@@ -1,9 +1,11 @@
 {
   "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
-    "nav": {
-      "description": "A blank schematic.",
-      "factory": "./nav/index#nav"
+    "menu": {
+      "aliases": [ "mnu" ],
+      "factory": "./menu",
+      "description": "Generates a menu component",
+      "schema": "./menu/schema.json"
     }
   }
 }
