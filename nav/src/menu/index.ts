@@ -1,10 +1,36 @@
-import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { chain, mergeWith } from '@angular-devkit/schematics';
+import { dasherize, classify } from '@angular-devkit/core/src/utils/strings';
+import { MenuOptions } from './schema';
+import { apply, filter, move, Rule, template, url, branchAndMerge } from '@angular-devkit/schematics';
+import { normalize } from '@angular-devkit/core';
 
+const stringUtils = { dasherize, classify };
 
-// You don't have to export the function as default. You can also have more than one rule factory
-// per file.
-export function nav(options: any): Rule {
-  return (tree: Tree, _context: SchematicContext) => {
-    return tree;
-  };
+function filterTemplates(options: MenuOptions): Rule {
+  if (!options.menuService) {
+    return filter(path => !path.match(/\.service\.ts$/) && !path.match(/-item\.ts$/) && !path.match(/\.bak$/));
+  }
+  return filter(path => !path.match(/\.bak$/));
+}
+
+export default function (options: MenuOptions): Rule {
+
+    // TODO: Validate options and throw SchematicsException if validation fails
+    options.path = options.path ? normalize(options.path) : options.path;
+    
+    const templateSource = apply(url('./files'), [
+        filterTemplates(options),
+        template({
+          ...stringUtils,
+          ...options
+        }),
+        move(options.sourceDir)
+      ]);
+      
+      return chain([
+        branchAndMerge(chain([
+          mergeWith(templateSource)
+        ])),
+      ]);
+
 }
